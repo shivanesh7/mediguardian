@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom Floating Animations & Utilities */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(1.5deg);
+  }
+}
+
+@keyframes float-medium {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-25px) rotate(-3deg);
+  }
+}
+
+@keyframes float-brisk {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-35px) rotate(2.5deg);
+  }
+}
+
+@keyframes float-sphere {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) translateX(12px) rotate(180deg);
+  }
+}
+
+@keyframes float-pulse {
+  0%, 100% {
+    transform: scale(1) translateY(0px);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.03) translateY(-8px);
+    opacity: 1;
+  }
+}
+
+@utility glass-card {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(244, 63, 94, 0.08);
+}
+
+@utility glass-card-dark {
+  background: rgba(15, 10, 20, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+@utility glass-button {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@utility animate-float-gentle {
+  animation: float-gentle 8s ease-in-out infinite;
+}
+
+@utility animate-float-medium {
+  animation: float-medium 10s ease-in-out infinite;
+}
+
+@utility animate-float-brisk {
+  animation: float-brisk 6s ease-in-out infinite;
+}
+
+@utility animate-float-sphere {
+  animation: float-sphere 14s ease-in-out infinite;
+}
+
+@utility animate-float-pulse {
+  animation: float-pulse 5s ease-in-out infinite;
+}
+
