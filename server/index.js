@@ -17,6 +17,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/schedules', require('./routes/schedule'));
 app.use('/api/appointments', require('./routes/appointment'));
 
+// Start Background Medication Reminders Service
+require('./services/notificationService');
+
 // General Route
 app.get('/', (req, res) => {
   res.send('Mediguardian API is running');

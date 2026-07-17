@@ -27,6 +27,11 @@ export default function PatientDashboard() {
   const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD format
 
   useEffect(() => {
+    // Request permission for Web Notifications on mount
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (usr) => {
       if (usr) {
         setUserId(usr.uid);
@@ -37,6 +42,43 @@ export default function PatientDashboard() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Web Notifications Checker Loop
+  useEffect(() => {
+    const checkDoses = () => {
+      if (!("Notification" in window) || Notification.permission !== "granted" || schedules.length === 0) return;
+
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0 hour should be 12
+      const formattedCurrentTime = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+
+      schedules.forEach(s => {
+        const slots = s.timeSlots || [];
+        const records = s.adherenceRecord || [];
+        
+        slots.forEach(slot => {
+          if (slot.time === formattedCurrentTime) {
+            const isTaken = records.some(r => r.date === todayStr && r.timeSlot === slot.time && r.taken);
+            if (!isTaken) {
+              new Notification("💊 Medication Reminder", {
+                body: `It's time to take your ${s.medicationName} (${s.dosage}). Instructions: ${s.instructions || 'No instructions'}`,
+                icon: "/favicon.ico"
+              });
+            }
+          }
+        });
+      });
+    };
+
+    // Run check immediately on load, and then every 60 seconds
+    checkDoses();
+    const intervalId = setInterval(checkDoses, 60000);
+    return () => clearInterval(intervalId);
+  }, [schedules]);
 
   const fetchData = async (uid) => {
     try {
