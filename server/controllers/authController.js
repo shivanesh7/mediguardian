@@ -100,3 +100,37 @@ exports.getCaregiverPatients = async (req, res) => {
     res.status(500).json({ success: false, error: 'Server error while fetching patients' });
   }
 };
+
+// Update a user's phone number
+exports.updatePhone = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { phone } = req.body;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    await user.update({ phone: phone || '' });
+    res.status(200).json({ success: true, message: 'Phone number updated successfully', data: user });
+  } catch (error) {
+    console.error('Error updating phone number:', error);
+    res.status(500).json({ success: false, error: 'Server error while updating phone number' });
+  }
+};
+
+// Get a single user by ID
+exports.getUserById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    console.error('Error fetching user by ID:', error);
+    res.status(500).json({ success: false, error: 'Server error while fetching user profile' });
+  }
+};

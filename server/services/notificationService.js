@@ -4,6 +4,19 @@ const Schedule = require('../models/Schedule');
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
 
+// Initialize Twilio
+let twilioClient = null;
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER } = process.env;
+
+if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
+  try {
+    twilioClient = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+    console.log('Twilio Client initialized successfully.');
+  } catch (err) {
+    console.error('Failed to initialize Twilio client:', err.message);
+  }
+}
+
 // Set up email transporter (simulate using console logs, or send using local SMTP/Ethereal mailer)
 const transporter = nodemailer.createTransport({
   host: 'smtp.ethereal.email',
@@ -56,6 +69,28 @@ cron.schedule('* * * * *', async () => {
             if (patient) {
               console.log(`[EMAIL SIMULATION] Dose due for ${patient.name} (${patient.email}) - Medicine: ${s.medicationName}`);
               
+              // Trigger SMS alert if phone is present
+              const phoneNumber = patient.phone;
+              if (phoneNumber && phoneNumber.trim() !== '') {
+                const smsBody = `MediGuard Reminder: Hi ${patient.name}, it's time to take your ${s.medicationName} (${s.dosage}). Slot: ${formattedTime}. Instructions: ${s.instructions || 'None'}.`;
+                if (twilioClient && TWILIO_PHONE_NUMBER) {
+                  try {
+                    const message = await twilioClient.messages.create({
+                      body: smsBody,
+                      from: TWILIO_PHONE_NUMBER,
+                      to: phoneNumber
+                    });
+                    console.log(`[TWILIO SMS] Real SMS sent to ${phoneNumber}. SID: ${message.sid}`);
+                  } catch (smsErr) {
+                    console.error(`[TWILIO SMS] Failed to send real SMS to ${phoneNumber}:`, smsErr.message);
+                  }
+                } else {
+                  console.log(`[SMS SIMULATION] Sending SMS to ${phoneNumber}: "${smsBody}"`);
+                }
+              } else {
+                console.log(`[SMS SIMULATION] Patient ${patient.name} has no phone number configured. SMS alert skipped.`);
+              }
+
               // Send simulated email
               try {
                 const info = await transporter.sendMail({

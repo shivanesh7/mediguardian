@@ -10,6 +10,7 @@ export default function PatientDashboard() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
+  const [phoneInput, setPhoneInput] = useState("");
 
   // Custom medicine modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -85,6 +86,13 @@ export default function PatientDashboard() {
       setLoading(true);
       setError("");
       
+      // Fetch User details (for phone number)
+      const userRes = await fetch(`http://localhost:5000/api/auth/users/${uid}`);
+      const userData = await userRes.json();
+      if (userData.success && userData.data) {
+        setPhoneInput(userData.data.phone || "");
+      }
+
       // Fetch schedules
       const schedRes = await fetch(`http://localhost:5000/api/schedules/patient/${uid}`);
       const schedData = await schedRes.json();
@@ -100,6 +108,30 @@ export default function PatientDashboard() {
       setError("Unable to connect to the backend server. Make sure it is running.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updatePhoneNumber = async () => {
+    if (!userId) return;
+    try {
+      setSyncing(true);
+      setError("");
+      const res = await fetch(`http://localhost:5000/api/auth/users/${userId}/phone`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phoneInput })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Phone number updated successfully for SMS reminders!");
+      } else {
+        setError(data.error || "Failed to update phone number.");
+      }
+    } catch (err) {
+      console.error("Error updating phone:", err);
+      setError("Failed to sync phone number.");
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -464,6 +496,39 @@ export default function PatientDashboard() {
                   );
                 })
               )}
+            </div>
+          </div>
+
+          {/* SMS Notification Settings */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-slate-800 text-base" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                📱 SMS Reminders
+              </h3>
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Mobile Number</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={phoneInput}
+                    onChange={(e) => setPhoneInput(e.target.value)}
+                    placeholder="e.g. +15551234567"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-teal-500 bg-white/50 text-slate-700 font-semibold text-xs"
+                  />
+                  <button 
+                    onClick={updatePhoneNumber}
+                    disabled={syncing}
+                    className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-sm disabled:opacity-50"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+                Enter your mobile number with country code (e.g., +1234567890) to receive automatic medication alerts via SMS.
+              </p>
             </div>
           </div>
         </div>
