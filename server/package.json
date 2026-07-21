@@ -19,6 +19,7 @@
     "mongoose": "^9.3.0",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.2",
+    "pdfkit": "^0.19.1",
     "pg": "^8.21.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.8",
